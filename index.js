@@ -1,3 +1,5 @@
+
+
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -29,7 +31,14 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const productCOllection = client.db('productDB').collection('product')
 
+    app.post('/product', async(req, res)=>{
+        const newProduct = req.body;
+        console.log(newProduct);
+        const result = await productCOllection.insertOne(newProduct);
+        res.send(result);
+    })
 
 
 
