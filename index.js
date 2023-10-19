@@ -3,7 +3,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -33,6 +33,7 @@ async function run() {
 
     const productCollection = client.db('productDB').collection('product')
     const brandCollection = client.db('productDB').collection('brand')
+    const cardCollection = client.db('productDB').collection('card')
 
     //database theke data server a niye asha get kore
     app.get('/brand', async(req, res)=>{
@@ -45,11 +46,55 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
   })
+  //get for specific items
+    app.get('/product/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await productCollection.findOne(query);
+      res.send(result)
+  })
+    //update 
+    app.put('/product/:id',async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const options = {upsert: true};
+      const updatedproduct = req.body;
+      const product = {
+        $set: {
+          name: updatedproduct.name, 
+          brand: updatedproduct.brand, 
+          type: updatedproduct.type, 
+          price: updatedproduct.price,
+          category: updatedproduct.category,
+          description: updatedproduct.description,
+          rating: updatedproduct.rating,
+          photo: updatedproduct.photo,
+        }
+      }
+      const result = await productCollection.updateOne(filter, product, options);
+      res.send(result);
+    })
 
     app.post('/product', async(req, res)=>{
         const newProduct = req.body;
         console.log(newProduct);
         const result = await productCollection.insertOne(newProduct);
+        res.send(result);
+    })
+    app.get('/myCard', async (req, res) => {
+      console.log(req.query.email);
+      let query = {};
+      if (req.query?.email) {
+          query = { email: req.query.email }
+      }
+      const result = await cardCollection.find(query).toArray();
+      res.send(result);
+  })
+
+    app.post('/card', async(req, res)=>{
+        const newCard = req.body;
+        console.log(newCard);
+        const result = await cardCollection.insertOne(newCard);
         res.send(result);
     })
 
