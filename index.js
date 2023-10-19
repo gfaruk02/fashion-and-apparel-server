@@ -82,7 +82,7 @@ async function run() {
         res.send(result);
     })
     app.get('/myCard', async (req, res) => {
-      console.log(req.query.email);
+      // console.log(req.query.email);
       let query = {};
       if (req.query?.email) {
           query = { email: req.query.email }
@@ -98,7 +98,12 @@ async function run() {
         res.send(result);
     })
 
-
+    app.delete('/card/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await cardCollection.deleteOne(query);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
